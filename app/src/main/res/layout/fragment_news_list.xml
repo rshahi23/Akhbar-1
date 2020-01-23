@@ -37,7 +37,7 @@
                     android:layout_height="match_parent"
                     android:layout_toLeftOf="@+id/actionSearch"
                     android:hint="Search..."
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/colorAccent"
                     android:textColorHint="#bababa"
                     android:visibility="gone" />
 
