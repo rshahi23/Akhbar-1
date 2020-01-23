@@ -33,8 +33,6 @@ public class NewsDetailFragment extends Fragment {
         Glide.with(getContext())
                 .load(bundle.getString("newsImage"))
                 .into(newsHeaderImage);
-        TextView toolbarTitle = (TextView) view.findViewById(R.id.toolbarTitle);
-        toolbarTitle.setText(bundle.getString("newsTitle"));
 
         ImageView shareAction = (ImageView) view.findViewById(R.id.shareAction);
         shareAction.setOnClickListener(new View.OnClickListener() {

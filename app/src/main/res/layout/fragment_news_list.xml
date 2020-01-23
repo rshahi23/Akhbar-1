@@ -48,6 +48,8 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="16dp"
+                    android:padding="8dp"
+                    android:background="@drawable/selector_toolbar"
                     android:src="@drawable/ic_action_search" />
 
             </RelativeLayout>
@@ -61,6 +63,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
+        android:scrollbars="vertical"
+        android:scrollbarSize="4dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <RelativeLayout
