@@ -129,6 +129,7 @@ public class NewsListFragment extends Fragment {
                                 bundle.putString("newsTitle", data.getNewsTitle());
                                 bundle.putString("newsDescription", data.getNewsDescription());
                                 bundle.putString("newsImage", data.getNewsImage());
+                                bundle.putString("newsUrl", data.getUrl());
                                 NewsDetailFragment detailFragment = new NewsDetailFragment();
                                 detailFragment.setArguments(bundle);
                                 getActivity().getSupportFragmentManager()
