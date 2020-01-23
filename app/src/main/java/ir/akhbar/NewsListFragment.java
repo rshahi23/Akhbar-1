@@ -1,10 +1,13 @@
 package ir.akhbar;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +30,26 @@ public class NewsListFragment extends Fragment {
     private RecyclerView newsRecycler;
     private EditText searchInput;
     private TextView toolbarTitle;
+
+    private Handler handler;
+    private Runnable searchRunnable;
+
+    private Networking networking;
+
+    private String searchQuery = "Iran";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        networking = new Networking();
+        handler = new Handler();
+        searchRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchData(networking, searchQuery);
+            }
+        };
+    }
 
     @Nullable
     @Override
@@ -51,7 +74,28 @@ public class NewsListFragment extends Fragment {
             }
         });
 
-        final Networking networking = new Networking();
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(final Editable s) {
+                if (s.toString().isEmpty()) {
+                    searchQuery = "Iran";
+                } else {
+                    searchQuery = s.toString();
+                }
+                handler.removeCallbacks(searchRunnable);
+                handler.postDelayed(searchRunnable, 1000);
+            }
+        });
 
         progress = (ProgressBar) view.findViewById(R.id.progress);
         failureView = (RelativeLayout) view.findViewById(R.id.failureView);
@@ -63,16 +107,16 @@ public class NewsListFragment extends Fragment {
             public void onClick(View v) {
                 failureView.setVisibility(View.GONE);
                 progress.setVisibility(View.VISIBLE);
-                fetchData(networking);
+                fetchData(networking, "Iran");
             }
         });
 
-        fetchData(networking);
+        fetchData(networking, "Iran");
     }
 
-    private void fetchData(Networking networking) {
+    private void fetchData(Networking networking, String query) {
         networking.getServer()
-                .getNewsList("America", "6fba2629782d465abd2dc5f427223cc0")
+                .getNewsList(query, "6fba2629782d465abd2dc5f427223cc0")
                 .enqueue(new Callback<ServerResponse>() {
                     @Override
                     public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
