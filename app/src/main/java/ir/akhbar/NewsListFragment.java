@@ -26,10 +26,12 @@ import retrofit2.Response;
 public class NewsListFragment extends Fragment {
 
     private ProgressBar progress;
+    private ProgressBar searchProgress;
     private RelativeLayout failureView;
     private RecyclerView newsRecycler;
     private EditText searchInput;
     private TextView toolbarTitle;
+    private ImageView searchAction;
 
     private Handler handler;
     private Runnable searchRunnable;
@@ -37,6 +39,8 @@ public class NewsListFragment extends Fragment {
     private Networking networking;
 
     private String searchQuery = "Iran";
+
+    private final String defaultQuery = "Iran";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +50,8 @@ public class NewsListFragment extends Fragment {
         searchRunnable = new Runnable() {
             @Override
             public void run() {
+                searchProgress.setVisibility(View.VISIBLE);
+                searchAction.setVisibility(View.GONE);
                 fetchData(networking, searchQuery);
             }
         };
@@ -65,7 +71,9 @@ public class NewsListFragment extends Fragment {
         toolbarTitle = (TextView) view.findViewById(R.id.toolbarTitle);
         searchInput = (EditText) view.findViewById(R.id.searchInput);
 
-        final ImageView searchAction = (ImageView) view.findViewById(R.id.actionSearch);
+        searchProgress = (ProgressBar) view.findViewById(R.id.searchProgress);
+
+        searchAction = (ImageView) view.findViewById(R.id.actionSearch);
         searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,7 +96,7 @@ public class NewsListFragment extends Fragment {
             @Override
             public void afterTextChanged(final Editable s) {
                 if (s.toString().isEmpty()) {
-                    searchQuery = "Iran";
+                    searchQuery = defaultQuery;
                 } else {
                     searchQuery = s.toString();
                 }
@@ -107,11 +115,11 @@ public class NewsListFragment extends Fragment {
             public void onClick(View v) {
                 failureView.setVisibility(View.GONE);
                 progress.setVisibility(View.VISIBLE);
-                fetchData(networking, "Iran");
+                fetchData(networking, defaultQuery);
             }
         });
 
-        fetchData(networking, "Iran");
+        fetchData(networking, defaultQuery);
     }
 
     private void fetchData(Networking networking, String query) {
@@ -121,6 +129,8 @@ public class NewsListFragment extends Fragment {
                     @Override
                     public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                         progress.setVisibility(View.GONE);
+                        searchProgress.setVisibility(View.GONE);
+                        searchAction.setVisibility(View.VISIBLE);
                         ServerResponse serverResponse = response.body();
                         NewsAdapter adapter = new NewsAdapter(serverResponse.getArticles(), new NewsItemClickListener() {
                             @Override
@@ -155,6 +165,9 @@ public class NewsListFragment extends Fragment {
         if (searchInput.getVisibility() == View.VISIBLE) {
             searchInput.setVisibility(View.GONE);
             toolbarTitle.setVisibility(View.VISIBLE);
+            searchProgress.setVisibility(View.VISIBLE);
+            searchAction.setVisibility(View.GONE);
+            fetchData(networking, defaultQuery);
             canHandleBackPressed = true;
         }
         return canHandleBackPressed;

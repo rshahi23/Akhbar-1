@@ -35,22 +35,37 @@
                     android:id="@+id/searchInput"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_toLeftOf="@+id/actionSearch"
+                    android:layout_toLeftOf="@+id/searchContainer"
                     android:hint="Search..."
                     android:textColor="@color/colorAccent"
                     android:textColorHint="#bababa"
                     android:visibility="gone" />
 
-                <ImageView
-                    android:id="@+id/actionSearch"
+                <RelativeLayout
+                    android:id="@+id/searchContainer"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="16dp"
-                    android:padding="8dp"
-                    android:background="@drawable/selector_toolbar"
-                    android:src="@drawable/ic_action_search" />
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true">
+
+                    <ImageView
+                        android:id="@+id/actionSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="16dp"
+                        android:background="@drawable/selector_toolbar"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_action_search" />
+
+                    <ProgressBar
+                        android:id="@+id/searchProgress"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="24dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
 
             </RelativeLayout>
 
@@ -63,8 +78,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        android:scrollbars="vertical"
         android:scrollbarSize="4dp"
+        android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <RelativeLayout
