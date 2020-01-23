@@ -158,4 +158,13 @@ public class NewsListFragment extends Fragment {
         }
         return canHandleBackPressed;
     }
+
+    @Override
+    public void onDestroyView() {
+        if (searchInput.getVisibility() == View.VISIBLE) {
+            searchInput.setVisibility(View.GONE);
+            toolbarTitle.setVisibility(View.VISIBLE);
+        }
+        super.onDestroyView();
+    }
 }
