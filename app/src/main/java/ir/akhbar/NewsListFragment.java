@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -17,6 +19,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,9 +46,17 @@ public class NewsListFragment extends Fragment {
 
     private final String defaultQuery = "Iran";
 
+    private DatabaseThread databaseThread;
+
+    private NewsDao newsDao;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ApplicationDatabase applicationDatabase = Room.databaseBuilder(getContext(), ApplicationDatabase.class, "application_database")
+                .build();
+        newsDao = applicationDatabase.getNewsDao();
+        databaseThread = new DatabaseThread();
         networking = new Networking();
         handler = new Handler();
         searchRunnable = new Runnable() {
@@ -131,6 +144,7 @@ public class NewsListFragment extends Fragment {
                         searchProgress.setVisibility(View.GONE);
                         searchAction.setVisibility(View.VISIBLE);
                         ServerResponse serverResponse = response.body();
+                        updateDatabase(serverResponse);
                         NewsAdapter adapter = new NewsAdapter(serverResponse.getArticles(), new NewsItemClickListener() {
                             @Override
                             public void onClick(NewsData data) {
@@ -157,6 +171,24 @@ public class NewsListFragment extends Fragment {
                         failureView.setVisibility(View.VISIBLE);
                     }
                 });
+    }
+
+    private void updateDatabase(final ServerResponse serverResponse) {
+        databaseThread.addRunnable(new Runnable() {
+            @Override
+            public void run() {
+                List<NewsTable> news = new ArrayList<>();
+                for (NewsData newsData : serverResponse.getArticles()) {
+                    NewsTable newsTable = mapNewsDataToNewsTable(newsData);
+                    news.add(newsTable);
+                }
+                newsDao.addNewsList(news);
+            }
+        });
+    }
+
+    private NewsTable mapNewsDataToNewsTable(NewsData newsData) {
+        return new NewsTable(newsData.getNewsTitle(), newsData.getNewsDescription(), newsData.getNewsImage(), newsData.getUrl());
     }
 
     public boolean canHandleBackPressed() {
