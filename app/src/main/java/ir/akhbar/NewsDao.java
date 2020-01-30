@@ -1,6 +1,7 @@
 package ir.akhbar;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -14,4 +15,7 @@ public interface NewsDao {
 
     @Insert(entity = NewsTable.class)
     void addNewsList(List<NewsTable> news);
+
+    @Delete(entity = NewsTable.class)
+    void deleteAllNews(List<NewsTable> news);
 }

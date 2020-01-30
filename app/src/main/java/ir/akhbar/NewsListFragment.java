@@ -140,47 +140,77 @@ public class NewsListFragment extends Fragment {
                 .enqueue(new Callback<ServerResponse>() {
                     @Override
                     public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
-                        progress.setVisibility(View.GONE);
-                        searchProgress.setVisibility(View.GONE);
-                        searchAction.setVisibility(View.VISIBLE);
-                        ServerResponse serverResponse = response.body();
-                        updateDatabase(serverResponse);
-                        NewsAdapter adapter = new NewsAdapter(serverResponse.getArticles(), new NewsItemClickListener() {
-                            @Override
-                            public void onClick(NewsData data) {
-                                Bundle bundle = new Bundle();
-                                bundle.putString("newsTitle", data.getNewsTitle());
-                                bundle.putString("newsDescription", data.getNewsDescription());
-                                bundle.putString("newsImage", data.getNewsImage());
-                                bundle.putString("newsUrl", data.getUrl());
-                                NewsDetailFragment detailFragment = new NewsDetailFragment();
-                                detailFragment.setArguments(bundle);
-                                getActivity().getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .addToBackStack(null)
-                                        .replace(R.id.fragmentContainer, detailFragment)
-                                        .commit();
-                            }
-                        });
-                        newsRecycler.setAdapter(adapter);
+                        updateRecyclerView(response.body().getArticles());
                     }
 
                     @Override
                     public void onFailure(Call<ServerResponse> call, Throwable t) {
                         progress.setVisibility(View.GONE);
-                        failureView.setVisibility(View.VISIBLE);
+                        final List<NewsTable> news = new ArrayList<>();
+                        databaseThread.addRunnable(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("Code 1 " + Thread.currentThread().getName());
+                                news.addAll(newsDao.getAllNews());
+                                NewsData[] newsDatas = new NewsData[news.size()];
+                                if (!news.isEmpty()) {
+                                    for (int i = 0; i < news.size(); i++) {
+                                        NewsTable newsTable = news.get(i);
+                                        NewsData newsData = mapNewsTableToNewsData(newsTable);
+                                        newsDatas[i] = newsData;
+                                    }
+                                    updateRecyclerView(newsDatas);
+                                } else {
+                                    new Handler(getActivity().getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            failureView.setVisibility(View.VISIBLE);
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     }
                 });
     }
 
-    private void updateDatabase(final ServerResponse serverResponse) {
+    private void updateRecyclerView(NewsData[] newsData) {
+        progress.setVisibility(View.GONE);
+        searchProgress.setVisibility(View.GONE);
+        searchAction.setVisibility(View.VISIBLE);
+        updateDatabase(newsData);
+        NewsAdapter adapter = new NewsAdapter(newsData, new NewsItemClickListener() {
+            @Override
+            public void onClick(NewsData data) {
+                Bundle bundle = new Bundle();
+                bundle.putString("newsTitle", data.getNewsTitle());
+                bundle.putString("newsDescription", data.getNewsDescription());
+                bundle.putString("newsImage", data.getNewsImage());
+                bundle.putString("newsUrl", data.getUrl());
+                NewsDetailFragment detailFragment = new NewsDetailFragment();
+                detailFragment.setArguments(bundle);
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .addToBackStack(null)
+                        .replace(R.id.fragmentContainer, detailFragment)
+                        .commit();
+            }
+        });
+        newsRecycler.setAdapter(adapter);
+    }
+
+    private void updateDatabase(final NewsData[] newsData) {
         databaseThread.addRunnable(new Runnable() {
             @Override
             public void run() {
                 List<NewsTable> news = new ArrayList<>();
-                for (NewsData newsData : serverResponse.getArticles()) {
+                for (NewsData newsData : newsData) {
                     NewsTable newsTable = mapNewsDataToNewsTable(newsData);
                     news.add(newsTable);
+                }
+                List<NewsTable> newsTables = newsDao.getAllNews();
+                if (!newsTables.isEmpty()) {
+                    newsDao.deleteAllNews(newsTables);
                 }
                 newsDao.addNewsList(news);
             }
@@ -189,6 +219,10 @@ public class NewsListFragment extends Fragment {
 
     private NewsTable mapNewsDataToNewsTable(NewsData newsData) {
         return new NewsTable(newsData.getNewsTitle(), newsData.getNewsDescription(), newsData.getNewsImage(), newsData.getUrl());
+    }
+
+    private NewsData mapNewsTableToNewsData(NewsTable newsTable) {
+        return new NewsData(newsTable.getTitle(), newsTable.getDescription(), newsTable.getUrlToImage(), newsTable.getUrl());
     }
 
     public boolean canHandleBackPressed() {
