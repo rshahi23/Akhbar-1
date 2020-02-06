@@ -29,12 +29,6 @@ public class UpdateDatabaseTask extends AsyncTask<NewsData, String, Boolean> {
         return true;
     }
 
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
-        System.out.println("LOLLIPOP " + aBoolean);
-    }
-
     private NewsTable mapNewsDataToNewsTable(NewsData newsData) {
         return new NewsTable(newsData.getNewsTitle(), newsData.getNewsDescription(), newsData.getNewsImage(), newsData.getUrl());
     }

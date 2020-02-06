@@ -52,6 +52,8 @@ public class NewsListFragment extends Fragment {
 
     private UpdateDatabaseTask updateDatabaseTask;
 
+    private QueryDatabaseTask queryDatabaseTask;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +73,17 @@ public class NewsListFragment extends Fragment {
         };
 
         updateDatabaseTask = new UpdateDatabaseTask(newsDao);
+        queryDatabaseTask = new QueryDatabaseTask(new QueryDatabaseCallback() {
+            @Override
+            public void onQuerySuccess(NewsData[] newsDatas) {
+                updateRecyclerView(newsDatas);
+            }
+
+            @Override
+            public void onQueryFailure() {
+                failureView.setVisibility(View.VISIBLE);
+            }
+        }, newsDao);
     }
 
     @Nullable
@@ -150,29 +163,7 @@ public class NewsListFragment extends Fragment {
                     @Override
                     public void onFailure(Call<ServerResponse> call, Throwable t) {
                         progress.setVisibility(View.GONE);
-                        final List<NewsTable> news = new ArrayList<>();
-                        databaseThread.addRunnable(new Runnable() {
-                            @Override
-                            public void run() {
-                                news.addAll(newsDao.getAllNews());
-                                NewsData[] newsDatas = new NewsData[news.size()];
-                                if (!news.isEmpty()) {
-                                    for (int i = 0; i < news.size(); i++) {
-                                        NewsTable newsTable = news.get(i);
-                                        NewsData newsData = mapNewsTableToNewsData(newsTable);
-                                        newsDatas[i] = newsData;
-                                    }
-                                    updateRecyclerView(newsDatas);
-                                } else {
-                                    new Handler(getActivity().getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            failureView.setVisibility(View.VISIBLE);
-                                        }
-                                    });
-                                }
-                            }
-                        });
+                        queryDatabaseTask.execute();
                     }
                 });
     }
