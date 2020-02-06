@@ -50,6 +50,8 @@ public class NewsListFragment extends Fragment {
 
     private NewsDao newsDao;
 
+    private UpdateDatabaseTask updateDatabaseTask;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +69,8 @@ public class NewsListFragment extends Fragment {
                 fetchData(networking, searchQuery);
             }
         };
+
+        updateDatabaseTask = new UpdateDatabaseTask(newsDao);
     }
 
     @Nullable
@@ -150,7 +154,6 @@ public class NewsListFragment extends Fragment {
                         databaseThread.addRunnable(new Runnable() {
                             @Override
                             public void run() {
-                                System.out.println("Code 1 " + Thread.currentThread().getName());
                                 news.addAll(newsDao.getAllNews());
                                 NewsData[] newsDatas = new NewsData[news.size()];
                                 if (!news.isEmpty()) {
@@ -200,25 +203,7 @@ public class NewsListFragment extends Fragment {
     }
 
     private void updateDatabase(final NewsData[] newsData) {
-        databaseThread.addRunnable(new Runnable() {
-            @Override
-            public void run() {
-                List<NewsTable> news = new ArrayList<>();
-                for (NewsData newsData : newsData) {
-                    NewsTable newsTable = mapNewsDataToNewsTable(newsData);
-                    news.add(newsTable);
-                }
-                List<NewsTable> newsTables = newsDao.getAllNews();
-                if (!newsTables.isEmpty()) {
-                    newsDao.deleteAllNews(newsTables);
-                }
-                newsDao.addNewsList(news);
-            }
-        });
-    }
-
-    private NewsTable mapNewsDataToNewsTable(NewsData newsData) {
-        return new NewsTable(newsData.getNewsTitle(), newsData.getNewsDescription(), newsData.getNewsImage(), newsData.getUrl());
+        updateDatabaseTask.execute(newsData);
     }
 
     private NewsData mapNewsTableToNewsData(NewsTable newsTable) {
