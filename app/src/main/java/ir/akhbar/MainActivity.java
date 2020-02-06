@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
         newsListFragment = new NewsListFragment();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragmentContainer, newsListFragment)
+                .replace(R.id.fragmentContainer, new UiTestFragment())
                 .commit();
     }
 
