@@ -9,9 +9,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
 
     private NewsData[] newsArray;
 
-    private NewsItemClickListener itemClickListener;
+    private NewsItemClickListenerKt itemClickListener;
 
-    public NewsAdapter(NewsData[] newsArray, NewsItemClickListener itemClickListener) {
+    public NewsAdapter(NewsData[] newsArray, NewsItemClickListenerKt itemClickListener) {
         this.newsArray = newsArray;
         this.itemClickListener = itemClickListener;
     }

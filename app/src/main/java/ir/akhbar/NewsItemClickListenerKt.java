@@ -1,6 +1,6 @@
 package ir.akhbar;
 
-public interface NewsItemClickListener {
+public interface NewsItemClickListenerKt {
 
     void onClick(NewsData data);
 }

@@ -13,9 +13,9 @@ public class NewsViewHolder extends RecyclerView.ViewHolder {
     private TextView description;
     private ImageView newsImage;
 
-    private NewsItemClickListener itemClickListener;
+    private NewsItemClickListenerKt itemClickListener;
 
-    public NewsViewHolder(View itemView, NewsItemClickListener itemClickListener) {
+    public NewsViewHolder(View itemView, NewsItemClickListenerKt itemClickListener) {
         super(itemView);
         title = (TextView) itemView.findViewById(R.id.newsTitle);
         description = (TextView) itemView.findViewById(R.id.newsDescription);
